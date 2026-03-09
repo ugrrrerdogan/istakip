@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İş Takip — Kişisel İş Yönetim Platformu</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b10;
+  --s1: #0f1319;
+  --s2: #161c26;
+  --s3: #1d2535;
+  --border: #232d3f;
+  --border2: #2d3a50;
+  --blue: #3b82f6;
+  --blue2: #60a5fa;
+  --green: #10b981;
+  --green2: #34d399;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --cyan: #06b6d4;
+  --text: #e2e8f0;
+  --text2: #7a8fa6;
+  --text3: #3d4e63;
+  --r: 12px;
+  --r2: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;overflow-x:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:260px;min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200;transition:.3s;}
+.sidebar-top{padding:24px 20px 16px;}
+.app-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.app-name span{color:var(--blue);}
+.app-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+.module-switcher{margin:12px 16px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;}
+.module-btn{width:100%;padding:10px 14px;background:none;border:none;color:var(--text2);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:10px;transition:.2s;border-bottom:1px solid var(--border);}
+.module-btn:last-child{border-bottom:none;}
+.module-btn:hover{background:var(--s3);color:var(--text);}
+.module-btn.active{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(16,185,129,.1));color:var(--blue2);}
+.module-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.nav-section{padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;}
+.nav{padding:0 12px;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r2);cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:500;transition:.15s;margin-bottom:2px;white-space:nowrap;}
+.nav-item:hover{background:var(--s2);color:var(--text);}
+.nav-item.active{background:var(--s3);color:#fff;border:1px solid var(--border2);}
+.nav-item .ni{width:16px;text-align:center;font-size:15px;flex-shrink:0;}
+
+.sidebar-footer{padding:16px;border-top:1px solid var(--border);}
+.save-btn{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--r2);font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.save-btn:hover{background:#0ea271;}
+.backup-row{display:flex;gap:8px;margin-top:8px;}
+.mini-btn{flex:1;padding:8px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text2);font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:.2s;}
+.mini-btn:hover{background:var(--s3);color:var(--text);}
+
+/* ── MAIN ── */
+.main{margin-left:260px;flex:1;padding:28px 32px;min-height:100vh;}
+.page{display:none;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;}
+.ph-left h2{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.ph-left p{color:var(--text2);font-size:13px;margin-top:3px;}
+.ph-right{display:flex;gap:8px;flex-shrink:0;}
+
+/* ── GRID ── */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+.stat{position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.08;filter:blur(25px);}
+.stat.blue::before{background:var(--blue);}
+.stat.green::before{background:var(--green);}
+.stat.red::before{background:var(--red);}
+.stat.yellow::before{background:var(--yellow);}
+.stat.purple::before{background:var(--purple);}
+.stat.cyan::before{background:var(--cyan);}
+.sl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.sv{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;}
+.ss{font-size:12px;color:var(--text2);margin-top:5px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;margin-top:6px;}
+.b-blue{background:rgba(59,130,246,.15);color:var(--blue2);}
+.b-green{background:rgba(16,185,129,.15);color:var(--green2);}
+.b-red{background:rgba(239,68,68,.15);color:#f87171;}
+.b-yellow{background:rgba(245,158,11,.15);color:#fbbf24;}
+.b-purple{background:rgba(139,92,246,.15);color:#a78bfa;}
+.b-cyan{background:rgba(6,182,212,.15);color:#22d3ee;}
+
+/* ── TABLE ── */
+.tw{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;}
+.th{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.th h3{font-size:14px;font-weight:700;color:#fff;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 18px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);background:rgba(255,255,255,.015);}
+tbody td{padding:12px 18px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);}
+tbody tr:hover td{background:rgba(255,255,255,.018);}
+.tn{color:var(--text);font-weight:600;}
+.tsub{font-size:11px;color:var(--text3);margin-top:1px;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r2);border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;transition:.15s;white-space:nowrap;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{background:#2563eb;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#0ea271;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-purple:hover{background:#7c3aed;}
+.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--text2);}
+.btn-ghost:hover{background:var(--s3);color:var(--text);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-red{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2);}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.mo.open{display:flex;}
+.md{background:var(--s1);border:1px solid var(--border2);border-radius:var(--r);padding:28px;width:500px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);}
+.md h3{font-size:18px;font-weight:800;margin-bottom:20px;color:#fff;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 13px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);color:var(--text);font-size:13.5px;font-family:'Outfit',sans-serif;outline:none;transition:.2s;}
+.fg input:focus,.fg select:focus{border-color:var(--blue);}
+.fg select option{background:var(--s2);}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ma{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+.calc-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;margin-top:4px;}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+.calc-row span:first-child{font-size:12px;color:var(--text2);}
+.calc-row span:last-child{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.calc-divider{height:1px;background:var(--border);margin:8px 0;}
+
+/* ── CHART BAR ── */
+.cbi{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.cbl{width:130px;font-size:12px;color:var(--text2);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
+.cbt{flex:1;height:8px;background:var(--s3);border-radius:10px;overflow:hidden;}
+.cbf{height:100%;border-radius:10px;transition:.6s cubic-bezier(.4,0,.2,1);}
+.cbv{width:70px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:right;flex-shrink:0;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:3px;background:var(--s2);padding:4px;border-radius:var(--r2);width:fit-content;margin-bottom:18px;}
+.tab{padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text2);transition:.15s;}
+.tab.active{background:var(--blue);color:#fff;}
+
+/* ── CARI ── */
+.cc{border:1px solid var(--border);border-radius:var(--r);padding:14px;background:var(--s2);margin-bottom:10px;cursor:pointer;transition:.2s;}
+.cc:hover,.cc.sel{border-color:var(--blue);background:rgba(59,130,246,.06);}
+.cc-name{font-weight:700;color:#fff;font-size:14px;}
+.cc-bal{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+.bal-red{color:#f87171;}
+.bal-green{color:var(--green2);}
+
+/* ── PROJECT CARD ── */
+.proj-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:.2s;}
+.proj-card:hover{border-color:var(--border2);}
+.proj-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.ps-devam{background:rgba(59,130,246,.15);color:var(--blue2);}
+.ps-tamamlandi{background:rgba(16,185,129,.15);color:var(--green2);}
+.ps-bekliyor{background:rgba(245,158,11,.15);color:#fbbf24;}
+
+/* ── SEARCH ── */
+.sw{position:relative;}
+.sw input{padding-left:34px;width:200px;}
+.sw::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;pointer-events:none;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r2);padding:12px 18px;font-size:13px;font-weight:600;z-index:3000;transform:translateY(60px);opacity:0;transition:.3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── STOCK INDICATOR ── */
+.si{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
+.si-ok{background:var(--green);}
+.si-warn{background:var(--yellow);}
+.si-crit{background:var(--red);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+
+/* ── MONO ── */
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:16px 0;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr);}.g3{grid-template-columns:repeat(2,1fr);}}
+
+@media(max-width:768px){
+  body { flex-direction: column; }
+  .sidebar { 
+    width: 100%; min-height: auto; position: fixed; bottom: 0; top: auto;
+    left: 0; right: 0; flex-direction: row; border-right: none;
+    border-top: 1px solid var(--border); z-index: 200; height: 60px;
+  }
+  .sidebar-top, .nav-section, .module-switcher, .sidebar-footer { display: none; }
+  .nav { 
+    display: flex !important; flex-direction: row; padding: 0;
+    width: 100%; justify-content: space-around; align-items: center;
+  }
+  #nav-3d { display: none !important; }
+  #nav-urun { display: flex !important; }
+  .nav-item { 
+    flex-direction: column; gap: 2px; padding: 8px 4px;
+    font-size: 9px; flex: 1; justify-content: center; align-items: center;
+    border-radius: 0; margin-bottom: 0;
+  }
+  .nav-item span:last-child { display: block; font-size: 9px; }
+  .nav-item .ni { font-size: 18px; width: auto; }
+  .nav-item.active { background: rgba(59,130,246,.15); border: none; border-top: 2px solid var(--blue); }
+  .main { 
+    margin-left: 0; margin-bottom: 60px; padding: 14px;
+    width: 100%; min-height: calc(100vh - 60px);
+  }
+  .g4,.g3,.g2,.g21 { grid-template-columns: 1fr 1fr; }
+  .ph { flex-direction: column; gap: 10px; }
+  .ph-right { display: flex; flex-wrap: wrap; gap: 6px; }
+  .btn { font-size: 12px; padding: 8px 12px; }
+  table { font-size: 11px; }
+  thead th { padding: 8px 8px; font-size: 9px; }
+  tbody td { padding: 8px 8px; font-size: 11px; }
+  .tw { overflow-x: auto; }
+  .th { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .card { padding: 14px; }
+  .sv { font-size: 20px; }
+  .tabs { flex-wrap: wrap; }
+  .md { padding: 20px; }
+  .fr { grid-template-columns: 1fr; }
+  .module-bottom {
+    display: flex; position: fixed; top: 0; left: 0; right: 0;
+    background: var(--s1); border-bottom: 1px solid var(--border);
+    padding: 8px 12px; z-index: 199; gap: 8px; justify-content: space-between;
+    align-items: center;
+  }
+  .main { padding-top: 54px; }
+}
+
+@media(max-width:480px){
+  .g4,.g3,.g2,.g21 { grid-template-columns: 1fr; }
+  .sv { font-size: 18px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- MOBİL ÜST BAR -->
+<div class="module-bottom" id="mobile-topbar">
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-sm" id="mob-urun-btn" style="background:var(--blue);color:#fff;font-size:11px" onclick="switchModuleMobile('urun')">📦 Ürün</button>
+    <button class="btn btn-sm" id="mob-3d-btn" style="background:var(--s2);border:1px solid var(--border);color:var(--text2);font-size:11px" onclick="switchModuleMobile('3d')">🎨 3D</button>
+  </div>
+  <div style="font-size:13px;font-weight:800;color:#fff">İş<span style="color:var(--blue)">Takip</span></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-sm" style="background:var(--green);color:#fff;font-size:11px" onclick="saveData()">💾</button>
+    <button class="btn btn-sm" style="background:var(--s2);border:1px solid var(--border);color:var(--text2);font-size:11px" onclick="loadFromSheets()">☁️</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="app-name">İş<span>Takip</span></div>
+    <div class="app-sub">v2.0 — kişisel platform</div>
+  </div>
+
+  <div class="module-switcher">
+    <button class="module-btn active" onclick="switchModule('urun')">
+      <span class="module-dot" style="background:var(--blue)"></span>
+      <span>📦 Ürün Satışı</span>
+    </button>
+    <button class="module-btn" onclick="switchModule('3d')">
+      <span class="module-dot" style="background:var(--purple)"></span>
+      <span>🎨 3D Görselleştirme</span>
+    </button>
+  </div>
+
+  <div class="nav" id="nav-urun">
+    <div class="nav-section">Ürün Modülü</div>
+    <div class="nav-item active" onclick="goPage('dashboard','nav-urun')"><span class="ni">📊</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="goPage('stok','nav-urun')"><span class="ni">📦</span><span>Stok Yönetimi</span></div>
+    <div class="nav-item" onclick="goPage('satis','nav-urun')"><span class="ni">🛒</span><span>Satışlar</span></div>
+    <div class="nav-item" onclick="goPage('raporlar','nav-urun')"><span class="ni">📈</span><span>Raporlar</span></div>
+    <div class="nav-item" onclick="goPage('musteriler','nav-urun')"><span class="ni">👥</span><span>Müşteriler</span></div>
+    <div class="nav-item" onclick="goPage('tahsilat','nav-urun')"><span class="ni">💰</span><span>Tahsilat</span></div>
+  </div>
+
+  <div class="nav" id="nav-3d" style="display:none">
+    <div class="nav-section">3D Modülü</div>
+    <div class="nav-item" onclick="goPage('3d-dashboard','nav-3d')"><span class="ni">📊</span><span>Dashboard</span></div>
+    <div class="nav-item" onclick="goPage('3d-projeler','nav-3d')"><span class="ni">🏗️</span><span>Projeler</span></div>
+    <div class="nav-item" onclick="goPage('3d-raporlar','nav-3d')"><span class="ni">📈</span><span>Raporlar</span></div>
+  </div>
+
+  <div style="flex:1"></div>
+  <div class="sidebar-footer">
+    <button class="save-btn" onclick="saveData()">💾 <span>Kaydet</span></button>
+    <button class="mini-btn" onclick="loadFromSheets()" style="width:100%;margin-top:8px;padding:9px">☁️ <span>Sheets'ten Yükle</span></button>
+    <div class="backup-row">
+      <button class="mini-btn" onclick="exportData()">⬇ <span>Yedekle</span></button>
+      <button class="mini-btn" onclick="importData()">⬆ <span>Yükle</span></button>
+    </div>
+    <div id="sync-status" style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Başlatılıyor...</div>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importFile(this)">
+  </div>
+</aside>
+
+<!-- PAGES -->
+<main class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page active">
+  <div class="ph">
+    <div class="ph-left">
+      <h2>📊 Dashboard</h2>
+      <p id="dash-tarih"></p>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card stat blue"><div class="sl">Stok Değeri</div><div class="sv" id="d-stok">₺0</div><div class="ss">Maliyet bazlı</div><span class="badge b-blue" id="d-kalem">0 kalem</span></div>
+    <div class="card stat green"><div class="sl">Bu Ay Gelir</div><div class="sv" id="d-ay-gelir">₺0</div><div class="ss">Toplam satış</div><span class="badge b-green" id="d-ay-kar">Kâr: ₺0</span></div>
+    <div class="card stat red"><div class="sl">Açık Cari</div><div class="sv" id="d-cari">₺0</div><div class="ss">Tahsil edilmeyen</div><span class="badge b-red" id="d-cari-adet">0 müşteri</span></div>
+    <div class="card stat yellow"><div class="sl">Bugün Satış</div><div class="sv" id="d-bugun">₺0</div><div class="ss">Günlük gelir</div><span class="badge b-yellow" id="d-bugun-kar">Kâr: ₺0</span></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3 style="font-size:14px;font-weight:700">Ürün Satış Oranları</h3>
+        <span class="badge b-blue">Bu Ay</span>
+      </div>
+      <div id="d-urun-chart"><div class="empty"><div class="empty-icon">📊</div>Veri yok</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3 style="font-size:14px;font-weight:700">⚠️ Kritik Stok</h3>
+        <span class="badge b-red" id="d-kritik-sayi">0 ürün</span>
+      </div>
+      <div id="d-kritik-liste"><div class="empty"><div class="empty-icon">✅</div>Stoklar yeterli</div></div>
+    </div>
+  </div>
+  <div class="tw">
+    <div class="th"><h3>Son İşlemler</h3></div>
+    <table><thead><tr><th>Tarih</th><th>Ürün</th><th>Müşteri</th><th>Adet</th><th>Tutar</th><th>Kâr</th><th>Durum</th></tr></thead>
+    <tbody id="d-son-islemler"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== STOK ===== -->
+<div id="page-stok" class="page">
+  <div class="ph">
+    <div class="ph-left"><h2>📦 Stok Yönetimi</h2><p>Ürün varyasyonları ve stok takibi</p></div>
+    <div class="ph-right">
+      <button class="btn btn-ghost" onclick="openM('m-stok-giris')">📥 Stok Girişi</button>
+      <button class="btn btn-blue" onclick="openM('m-urun-ekle')">+ Ürün Ekle</button>
+    </div>
+  </div>
+  <div class="tw">
+    <div class="th">
+      <h3>Ürünler (<span id="stok-sayi">0</span>)</h3>
+      <div class="sw"><input placeholder="Ara..." oninput="filterStok(this.value)" id="stok-arama"></div>
+    </div>
+    <table><thead><tr><th>Ürün</th><th>Kategori</th><th>Menşei</th><th>Stok</th><th>Maliyet</th><th>Satış Fiyatı</th><th>Kâr Marjı</th><th>Durum</th><th></th></tr></thead>
+    <tbody id="stok-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== SATIŞ ===== -->
+<div id="page-satis" class="page">
+  <div class="ph">
+    <div class="ph-left"><h2>🛒 Satışlar</h2><p>Satış geçmişi ve yeni satış girişi</p></div>
+    <div class="ph-right">
+      <button class="btn btn-green" onclick="openM('m-satis-ekle')">+ Yeni Satış</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="filterSatis('hepsi',this)">Tümü</div>
+    <div class="tab" onclick="filterSatis('bugun',this)">Bugün</div>
+    <div class="tab" onclick="filterSatis('hafta',this)">Bu Hafta</div>
+    <div class="tab" onclick="filterSatis('ay',this)">Bu Ay</div>
+  </div>
+  <div class="g3" id="satis-ozet-cards">
+    <div class="card stat blue"><div class="sl">Toplam Gelir</div><div class="sv mono" id="s-toplam-gelir">₺0</div></div>
+    <div class="card stat green"><div class="sl">Toplam Kâr</div><div class="sv mono" id="s-toplam-kar">₺0</div></div>
+    <div class="card stat yellow"><div class="sl">Kâr Marjı</div><div class="sv mono" id="s-marj">%0</div></div>
+  </div>
+  <div class="tw">
+    <div class="th"><h3>Satış Listesi</h3></div>
+    <table><thead><tr><th>Tarih</th><th>Müşteri</th><th>Ürün</th><th>Adet</th><th>Birim Fiyat</th><th>Toplam</th><th>Maliyet</th><th>Kâr</th><th>Ödeme</th></tr></thead>
+    <tbody id="satis-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== RAPORLAR ===== -->
+<div id="page-raporlar" class="page">
+  <div class="ph"><div class="ph-left"><h2>📈 Raporlar</h2><p>Satış performansı ve kârlılık analizi</p></div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="showRapor('gunluk',this)">Günlük</div>
+    <div class="tab" onclick="showRapor('haftalik',this)">Haftalık</div>
+    <div class="tab" onclick="showRapor('aylik',this)">Aylık</div>
+    <div class="tab" onclick="showRapor('tumu',this)">Tümü</div>
+  </div>
+  <div class="g4">
+    <div class="card stat blue"><div class="sl">Satış</div><div class="sv mono" id="r-satis">₺0</div></div>
+    <div class="card stat green"><div class="sl">Kâr</div><div class="sv mono" id="r-kar">₺0</div></div>
+    <div class="card stat yellow"><div class="sl">Kâr Marjı</div><div class="sv mono" id="r-marj">%0</div></div>
+    <div class="card stat cyan"><div class="sl">Satış Adedi</div><div class="sv mono" id="r-adet">0</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Ürün Bazlı Satış</h3><div id="r-urun-chart"><div class="empty">Veri yok</div></div></div>
+    <div class="card"><h3 style="font-size:14px;font-weight:700;margin-bottom:14px">En Kârlı Ürünler</h3><div id="r-kar-chart"><div class="empty">Veri yok</div></div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Müşteri Bazlı Satış</h3>
+    <div id="r-musteri-chart"><div class="empty">Veri yok</div></div>
+  </div>
+</div>
+
+<!-- ===== MÜŞTERİLER ===== -->
+<div id="page-musteriler" class="page">
+  <div class="ph">
+    <div class="ph-left"><h2>👥 Müşteriler</h2><p>Cari hesaplar ve müşteri detayları</p></div>
+    <div class="ph-right"><button class="btn btn-blue" onclick="openM('m-musteri-ekle')">+ Müşteri Ekle</button></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div id="musteri-listesi"></div>
+    </div>
+    <div>
+      <div id="musteri-detay-bos" class="card" style="text-align:center;padding:50px">
+        <div style="font-size:48px;margin-bottom:12px">👤</div>
+        <p style="color:var(--text2)">Detay görmek için müşteri seçin</p>
+      </div>
+      <div id="musteri-detay" style="display:none">
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:18px;font-weight:800;color:#fff" id="md-ad">-</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px" id="md-tel">-</div>
+            </div>
+            <div class="cc-bal" id="md-bakiye">₺0</div>
+          </div>
+          <div class="div"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div><div class="sl">Toplam Satış</div><div class="mono" style="font-size:16px;font-weight:700" id="md-tsatis">₺0</div></div>
+            <div><div class="sl">Tahsilat</div><div class="mono" style="font-size:16px;font-weight:700;color:var(--green2)" id="md-ttahsilat">₺0</div></div>
+            <div><div class="sl">Bakiye</div><div class="mono" style="font-size:16px;font-weight:700" id="md-tbakiye2">₺0</div></div>
+          </div>
+        </div>
+        <div class="tw">
+          <div class="th"><h3>İşlem Geçmişi</h3>
+            <button class="btn btn-green btn-sm" onclick="openTahsilatMusteri()">+ Tahsilat</button>
+          </div>
+          <table><thead><tr><th>Tarih</th><th>Tür</th><th>Açıklama</th><th>Tutar</th><th>Bakiye</th></tr></thead>
+          <tbody id="md-islemler"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAHSİLAT ===== -->
+<div id="page-tahsilat" class="page">
+  <div class="ph">
+    <div class="ph-left"><h2>💰 Tahsilat</h2><p>Ödemeler ve borç takibi</p></div>
+    <div class="ph-right"><button class="btn btn-green" onclick="openM('m-tahsilat-ekle')">+ Tahsilat Ekle</button></div>
+  </div>
+  <div class="g3">
+    <div class="card stat red"><div class="sl">Toplam Alacak</div><div class="sv mono" id="t-alacak">₺0</div></div>
+    <div class="card stat green"><div class="sl">Bu Ay Tahsilat</div><div class="sv mono" id="t-ay-tah">₺0</div></div>
+    <div class="card stat yellow"><div class="sl">Bekleyen Müşteri</div><div class="sv mono" id="t-bekleyen">0</div></div>
+  </div>
+  <div class="tw">
+    <div class="th"><h3>Tahsilat Geçmişi</h3></div>
+    <table><thead><tr><th>Tarih</th><th>Müşteri</th><th>Tutar</th><th>Yöntem</th><th>Açıklama</th></tr></thead>
+    <tbody id="tahsilat-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== 3D DASHBOARD ===== -->
+<div id="page-3d-dashboard" class="page">
+  <div class="ph"><div class="ph-left"><h2>🎨 3D Görselleştirme</h2><p>Proje ve kazanç özeti</p></div></div>
+  <div class="g4">
+    <div class="card stat purple"><div class="sl">Toplam Kazanç</div><div class="sv mono" id="td-kazanc">₺0</div><div class="ss">Tüm projeler</div></div>
+    <div class="card stat blue"><div class="sl">Bu Ay</div><div class="sv mono" id="td-ay">₺0</div><div class="ss">Aylık kazanç</div></div>
+    <div class="card stat green"><div class="sl">Tamamlanan</div><div class="sv mono" id="td-tamamlanan">0</div><div class="ss">Proje</div></div>
+    <div class="card stat yellow"><div class="sl">Bekleyen Prim</div><div class="sv mono" id="td-prim">₺0</div><div class="ss">Ödenmemiş</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Son Projeler</h3>
+      <div id="td-son-projeler"><div class="empty">Proje yok</div></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Kazanç Dağılımı</h3>
+      <div id="td-kazanc-chart"><div class="empty">Veri yok</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3D PROJELER ===== -->
+<div id="page-3d-projeler" class="page">
+  <div class="ph">
+    <div class="ph-left"><h2>🏗️ Projeler</h2><p>3D görselleştirme proje takibi</p></div>
+    <div class="ph-right"><button class="btn btn-purple" onclick="openM('m-proje-ekle')">+ Proje Ekle</button></div>
+  </div>
+  <div id="proje-listesi"></div>
+</div>
+
+<!-- ===== 3D RAPORLAR ===== -->
+<div id="page-3d-raporlar" class="page">
+  <div class="ph"><div class="ph-left"><h2>📈 3D Raporlar</h2><p>Proje bazlı kazanç analizi</p></div></div>
+  <div class="g3">
+    <div class="card stat purple"><div class="sl">Toplam m²</div><div class="sv mono" id="tr-m2">0</div></div>
+    <div class="card stat blue"><div class="sl">Ort. m² Fiyatı</div><div class="sv mono" id="tr-ort">₺0</div></div>
+    <div class="card stat green"><div class="sl">Toplam Prim</div><div class="sv mono" id="tr-prim">₺0</div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px">Proje Bazlı Kazanç</h3>
+    <div id="tr-chart"><div class="empty">Veri yok</div></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Ürün Ekle -->
+<div class="mo" id="m-urun-ekle">
+  <div class="md">
+    <h3>📦 Yeni Ürün Ekle</h3>
+    <div class="fg"><label>Ürün Adı</label><input id="u-ad" placeholder="Örn: Bergamot Çay 500g"></div>
+    <div class="fg"><label>Kategori / Varyasyon</label><input id="u-kat" placeholder="Örn: Çay, Kahve, Baharat..."></div>
+    <div class="fg"><label>Menşei (Üretim Ülkesi)</label><input id="u-men" placeholder="Örn: Türkiye, Çin, Hindistan..."></div>
+    <div class="fr">
+      <div class="fg"><label>Maliyet (₺)</label><input id="u-mal" type="number" placeholder="0" step="0.01"></div>
+      <div class="fg"><label>Satış Fiyatı (₺)</label><input id="u-fiy" type="number" placeholder="0" step="0.01"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Başlangıç Stoku</label><input id="u-stk" type="number" placeholder="0"></div>
+      <div class="fg"><label>Kritik Stok Seviyesi</label><input id="u-krt" type="number" placeholder="5"></div>
+    </div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-urun-ekle')">İptal</button>
+      <button class="btn btn-blue" onclick="urunEkle()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stok Girişi -->
+<div class="mo" id="m-stok-giris">
+  <div class="md">
+    <h3>📥 Stok Girişi</h3>
+    <div class="fg"><label>Ürün</label><select id="sg-urun"></select></div>
+    <div class="fr">
+      <div class="fg"><label>Adet</label><input id="sg-adet" type="number" placeholder="0"></div>
+      <div class="fg"><label>Yeni Maliyet (₺/adet)</label><input id="sg-mal" type="number" placeholder="Boş bırakılabilir" step="0.01"></div>
+    </div>
+    <div class="fg"><label>Tarih</label><input id="sg-tarih" type="date"></div>
+    <div class="fg"><label>Tedarikçi / Fatura No</label><input id="sg-not" placeholder="Açıklama..."></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-stok-giris')">İptal</button>
+      <button class="btn btn-blue" onclick="stokGiris()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- Satış Ekle -->
+<div class="mo" id="m-satis-ekle">
+  <div class="md">
+    <h3>🛒 Yeni Satış</h3>
+    <div class="fg"><label>Müşteri</label><select id="s-mus"></select></div>
+    <div class="fg"><label>Ürün</label><select id="s-urun" onchange="satisUrunSec()"></select></div>
+    <div class="fr">
+      <div class="fg"><label>Adet</label><input id="s-adet" type="number" placeholder="1" oninput="satisCalc()"></div>
+      <div class="fg"><label>Birim Fiyat (₺)</label><input id="s-fiy" type="number" placeholder="0" step="0.01" oninput="satisCalc()"></div>
+    </div>
+    <div class="fg"><label>Tarih</label><input id="s-tarih" type="date"></div>
+    <div class="calc-box">
+      <div class="calc-row"><span>Toplam Tutar</span><span class="mono" id="s-calc-toplam">₺0</span></div>
+      <div class="calc-row"><span>Maliyet</span><span class="mono" id="s-calc-maliyet">₺0</span></div>
+      <div class="calc-divider"></div>
+      <div class="calc-row"><span style="font-weight:700;color:var(--green2)">Kâr</span><span class="mono" style="color:var(--green2)" id="s-calc-kar">₺0</span></div>
+    </div>
+    <div class="fg" style="margin-top:14px"><label>Ödeme Durumu</label>
+      <select id="s-odeme"><option value="acik">Açık (Vadeli)</option><option value="odendi">Ödendi</option></select>
+    </div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-satis-ekle')">İptal</button>
+      <button class="btn btn-green" onclick="satisEkle()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Müşteri Ekle -->
+<div class="mo" id="m-musteri-ekle">
+  <div class="md">
+    <h3>👤 Yeni Müşteri</h3>
+    <div class="fg"><label>Ad Soyad / Firma</label><input id="m-ad" placeholder="Müşteri adı"></div>
+    <div class="fr">
+      <div class="fg"><label>Telefon</label><input id="m-tel" placeholder="05xx xxx xx xx"></div>
+      <div class="fg"><label>Şehir</label><input id="m-seh" placeholder="İstanbul"></div>
+    </div>
+    <div class="fg"><label>Not</label><input id="m-not" placeholder="Opsiyonel..."></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-musteri-ekle')">İptal</button>
+      <button class="btn btn-blue" onclick="musteriEkle()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tahsilat Ekle -->
+<div class="mo" id="m-tahsilat-ekle">
+  <div class="md">
+    <h3>💰 Tahsilat Ekle</h3>
+    <div class="fg"><label>Müşteri</label><select id="t-mus"></select></div>
+    <div class="fr">
+      <div class="fg"><label>Tutar (₺)</label><input id="t-tutar" type="number" placeholder="0" step="0.01"></div>
+      <div class="fg"><label>Tarih</label><input id="t-tarih" type="date"></div>
+    </div>
+    <div class="fg"><label>Ödeme Yöntemi</label>
+      <select id="t-yon"><option value="Nakit">Nakit</option><option value="EFT/Havale">EFT / Havale</option><option value="Kredi Kartı">Kredi Kartı</option><option value="Çek">Çek</option><option value="Diğer">Diğer</option></select>
+    </div>
+    <div class="fg"><label>Açıklama</label><input id="t-not" placeholder="Opsiyonel..."></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-tahsilat-ekle')">İptal</button>
+      <button class="btn btn-green" onclick="tahsilatEkle()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Proje Ekle -->
+<div class="mo" id="m-proje-ekle">
+  <div class="md">
+    <h3>🏗️ Yeni 3D Proje</h3>
+    <div class="fg"><label>Proje Adı</label><input id="p-ad" placeholder="Villa, Daire, Ofis vb."></div>
+    <div class="fg"><label>Müşteri / Firma</label><input id="p-firma" placeholder="Firma adı"></div>
+    <div class="fr">
+      <div class="fg"><label>Alan (m²)</label><input id="p-m2" type="number" placeholder="0" step="0.1" oninput="projeCalc()"></div>
+      <div class="fg"><label>m² Birim Fiyat (₺)</label><input id="p-birim" type="number" placeholder="0" step="0.01" oninput="projeCalc()"></div>
+    </div>
+    <div class="fg"><label>İşin Toplam Bedeli (₺) <span style="color:var(--text3);font-weight:400;text-transform:none">— prim bu bedel üzerinden hesaplanır</span></label><input id="p-bedel" type="number" placeholder="0" step="0.01" oninput="projeCalc()"></div>
+    <div class="fr">
+      <div class="fg"><label>Prim Oranı (%)</label><input id="p-prim" type="number" placeholder="0" step="0.1" oninput="projeCalc()"></div>
+      <div class="fg"><label>Tarih</label><input id="p-tarih" type="date"></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-row"><span>Alan × Birim Fiyat</span><span class="mono" id="p-calc-base">₺0</span></div>
+      <div class="calc-row"><span>İşin Toplam Bedeli</span><span class="mono" id="p-calc-bedel">₺0</span></div>
+      <div class="calc-row"><span id="p-calc-prim-label">Prim (%0)</span><span class="mono" style="color:var(--purple)" id="p-calc-prim">₺0</span></div>
+      <div class="calc-divider"></div>
+      <div class="calc-row"><span style="font-weight:700;color:var(--green2)">Toplam Kazancım</span><span class="mono" style="color:var(--green2)" id="p-calc-toplam">₺0</span></div>
+    </div>
+    <div class="fg" style="margin-top:14px"><label>Durum</label>
+      <select id="p-durum"><option value="devam">Devam Ediyor</option><option value="tamamlandi">Tamamlandı</option><option value="bekliyor">Bekliyor</option></select>
+    </div>
+    <div class="fg"><label>Prim Durumu</label>
+      <select id="p-prim-durum"><option value="bekliyor">Bekliyor</option><option value="odendi">Ödendi</option></select>
+    </div>
+    <div class="fg"><label>Not</label><input id="p-not" placeholder="Opsiyonel..."></div>
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-proje-ekle')">İptal</button>
+      <button class="btn btn-purple" onclick="projeEkle()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Proje Düzenle -->
+<div class="mo" id="m-proje-duzenle">
+  <div class="md">
+    <h3>✏️ Proje Düzenle</h3>
+    <div class="fg"><label>Proje Adı</label><input id="pd-ad" placeholder="Villa, Daire, Ofis vb."></div>
+    <div class="fg"><label>Müşteri / Firma</label><input id="pd-firma" placeholder="Firma adı"></div>
+    <div class="fr">
+      <div class="fg"><label>Alan (m²)</label><input id="pd-m2" type="number" placeholder="0" step="0.1" oninput="projeDuzenleCalc()"></div>
+      <div class="fg"><label>m² Birim Fiyat (₺)</label><input id="pd-birim" type="number" placeholder="0" step="0.01" oninput="projeDuzenleCalc()"></div>
+    </div>
+    <div class="fg"><label>İşin Toplam Bedeli (₺)</label><input id="pd-bedel" type="number" placeholder="0" step="0.01" oninput="projeDuzenleCalc()"></div>
+    <div class="fr">
+      <div class="fg"><label>Prim Oranı (%)</label><input id="pd-prim" type="number" placeholder="0" step="0.1" oninput="projeDuzenleCalc()"></div>
+      <div class="fg"><label>Tarih</label><input id="pd-tarih" type="date"></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-row"><span>Alan × Birim Fiyat</span><span class="mono" id="pd-calc-base">₺0</span></div>
+      <div class="calc-row"><span>İşin Toplam Bedeli</span><span class="mono" id="pd-calc-bedel">₺0</span></div>
+      <div class="calc-row"><span id="pd-calc-prim-label">Prim (%0)</span><span class="mono" style="color:var(--purple)" id="pd-calc-prim">₺0</span></div>
+      <div class="calc-divider"></div>
+      <div class="calc-row"><span style="font-weight:700;color:var(--green2)">Toplam Kazancım</span><span class="mono" style="color:var(--green2)" id="pd-calc-toplam">₺0</span></div>
+    </div>
+    <div class="fg" style="margin-top:14px"><label>Durum</label>
+      <select id="pd-durum"><option value="devam">Devam Ediyor</option><option value="tamamlandi">Tamamlandı</option><option value="bekliyor">Bekliyor</option></select>
+    </div>
+    <div class="fg"><label>Prim Durumu</label>
+      <select id="pd-prim-durum"><option value="bekliyor">Bekliyor</option><option value="odendi">Ödendi</option></select>
+    </div>
+    <div class="fg"><label>Not</label><input id="pd-not" placeholder="Opsiyonel..."></div>
+    <input type="hidden" id="pd-id">
+    <div class="ma">
+      <button class="btn btn-ghost" onclick="closeM('m-proje-duzenle')">İptal</button>
+      <button class="btn btn-purple" onclick="projeKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const TODAY = new Date().toISOString().split('T')[0];
+
+let DB = {
+  urunler: [
+    {id:1,ad:'Bergamot Çay 500g',kat:'Çay',mal:45,fiy:75,stok:80,krt:10},
+    {id:2,ad:'Earl Grey 250g',kat:'Çay',mal:38,fiy:65,stok:4,krt:10},
+    {id:3,ad:'Yeşil Çay 250g',kat:'Çay',mal:32,fiy:55,stok:60,krt:10},
+    {id:4,ad:'Karabiber 100g',kat:'Baharat',mal:28,fiy:50,stok:3,krt:8},
+    {id:5,ad:'Zerdeçal 100g',kat:'Baharat',mal:22,fiy:40,stok:45,krt:8},
+    {id:6,ad:'Türk Kahvesi 500g',kat:'Kahve',mal:85,fiy:140,stok:25,krt:5},
+  ],
+  musteriler: [
+    {id:1,ad:'Ahmet Yılmaz Market',tel:'0532 111 22 33',seh:'İstanbul'},
+    {id:2,ad:'Fatma Hanım Bakkal',tel:'0544 222 33 44',seh:'Ankara'},
+    {id:3,ad:'Mehmet Bey Büfe',tel:'0555 333 44 55',seh:'İzmir'},
+  ],
+  satislar: [
+    {id:1,tarih:'2025-03-05',musId:1,urunId:1,adet:10,fiy:75,odeme:'odendi'},
+    {id:2,tarih:'2025-03-05',musId:2,urunId:6,adet:5,fiy:140,odeme:'acik'},
+    {id:3,tarih:'2025-03-06',musId:1,urunId:3,adet:8,fiy:55,odeme:'odendi'},
+    {id:4,tarih:'2025-03-06',musId:3,urunId:5,adet:12,fiy:40,odeme:'acik'},
+    {id:5,tarih:'2025-03-07',musId:2,urunId:6,adet:3,fiy:140,odeme:'acik'},
+  ],
+  tahsilatlar: [
+    {id:1,tarih:'2025-03-04',musId:2,tutar:300,yon:'Nakit',not:'Kısmi ödeme'},
+  ],
+  projeler: [
+    {id:1,ad:'Deniz Manzaralı Villa',firma:'ArkaMimarlar',m2:450,birim:12,bedel:180000,prim:8,tarih:'2025-02-15',durum:'tamamlandi',primDurum:'odendi',not:'3 odalı villa'},
+    {id:2,ad:'Şehir Merkezi Ofis',firma:'ProYapı A.Ş.',m2:280,birim:15,bedel:95000,prim:10,tarih:'2025-03-01',durum:'devam',primDurum:'bekliyor',not:''},
+    {id:3,ad:'Lüks Rezidans Daire',firma:'ArkaMimarlar',m2:165,birim:18,bedel:55000,prim:12,tarih:'2025-03-10',durum:'bekliyor',primDurum:'bekliyor',not:'Onay bekleniyor'},
+  ],
+  ids: {u:7,m:4,s:6,t:2,p:4}
+};
+
+// Load from localStorage — startup'ta INIT bloğu hallediyor
+
+// ============================================================
+// HELPERS
+// ============================================================
+const fmt = n => '₺' + parseFloat(n||0).toLocaleString('tr-TR',{minimumFractionDigits:0,maximumFractionDigits:2});
+const getU = id => DB.urunler.find(u=>u.id==id);
+const getM = id => DB.musteriler.find(m=>m.id==id);
+const sToplam = s => s.adet * s.fiy;
+const sKar = s => { const u=getU(s.urunId); return u ? s.adet*(s.fiy-u.mal) : 0; };
+const pBase = p => p.m2 * p.birim;
+const pPrim = p => (p.bedel||0) * p.prim / 100;
+const pToplam = p => pBase(p) + pPrim(p);
+const isToday = d => d === TODAY;
+const isWeek = d => { const dt=new Date(d),n=new Date(); const ws=new Date(n); ws.setDate(n.getDate()-((n.getDay()||7)-1)); ws.setHours(0,0,0,0); return dt>=ws; };
+const isMonth = d => { const dt=new Date(d),n=new Date(); return dt.getMonth()===n.getMonth()&&dt.getFullYear()===n.getFullYear(); };
+
+function getMusteriAcik(mid) {
+  const satToplam = DB.satislar.filter(s=>s.musId==mid).reduce((a,s)=>a+sToplam(s),0);
+  const tahToplam = DB.tahsilatlar.filter(t=>t.musId==mid).reduce((a,t)=>a+t.tutar,0);
+  return satToplam - tahToplam;
+}
+
+const COLORS = ['var(--blue)','var(--green)','var(--yellow)','var(--purple)','var(--cyan)','var(--pink)','#f97316','#84cc16'];
+
+function makeBarChart(data, containerId) {
+  const el = document.getElementById(containerId);
+  if(!data.length){ el.innerHTML='<div class="empty">Veri yok</div>'; return; }
+  const max = Math.max(...data.map(d=>d.val), 1);
+  el.innerHTML = data.map((d,i)=>`
+    <div class="cbi">
+      <div class="cbl" title="${d.label}">${d.label}</div>
+      <div class="cbt"><div class="cbf" style="width:${Math.round(d.val/max*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+      <div class="cbv" style="color:${COLORS[i%COLORS.length]}">${d.fmt||fmt(d.val)}</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let activeModule = 'urun';
+let selMusteri = null;
+
+function switchModuleMobile(mod) {
+  switchModule(mod);
+  document.getElementById('mob-urun-btn').style.background = mod==='urun' ? 'var(--blue)' : 'var(--s2)';
+  document.getElementById('mob-urun-btn').style.color = mod==='urun' ? '#fff' : 'var(--text2)';
+  document.getElementById('mob-3d-btn').style.background = mod==='3d' ? 'var(--purple)' : 'var(--s2)';
+  document.getElementById('mob-3d-btn').style.color = mod==='3d' ? '#fff' : 'var(--text2)';
+  const urunNav = document.getElementById('nav-urun');
+  const d3Nav = document.getElementById('nav-3d');
+  if(mod==='urun') { urunNav.style.display='flex'; d3Nav.style.display='none'; }
+  else { urunNav.style.display='none'; d3Nav.style.display='flex'; }
+}
+
+function switchModule(mod) {
+  activeModule = mod;
+  document.querySelectorAll('.module-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-urun').style.display = mod==='urun'?'block':'none';
+  document.getElementById('nav-3d').style.display = mod==='3d'?'block':'none';
+  if(mod==='urun') goPageDirect('dashboard','nav-urun');
+  else goPageDirect('3d-dashboard','nav-3d');
+}
+
+function goPage(pageId, navId) {
+  goPageDirect(pageId, navId);
+}
+
+function goPageDirect(pageId, navId) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#'+navId+' .nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+pageId)?.classList.add('active');
+  const items = document.querySelectorAll('#'+navId+' .nav-item');
+  const idx = ['dashboard','stok','satis','raporlar','musteriler','tahsilat','3d-dashboard','3d-projeler','3d-raporlar'].indexOf(pageId);
+  // find matching nav item by onclick content
+  items.forEach(item => { if(item.getAttribute('onclick')?.includes("'"+pageId+"'")) item.classList.add('active'); });
+
+  // Render
+  const renders = {
+    'dashboard': renderDashboard,
+    'stok': renderStok,
+    'satis': ()=>renderSatis('hepsi'),
+    'raporlar': ()=>renderRaporlar('aylik'),
+    'musteriler': renderMusteriler,
+    'tahsilat': renderTahsilat,
+    '3d-dashboard': render3DDashboard,
+    '3d-projeler': render3DProjeler,
+    '3d-raporlar': render3DRaporlar,
+  };
+  renders[pageId]?.();
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openM(id) {
+  if(id==='m-stok-giris') { fillUSelect('sg-urun'); document.getElementById('sg-tarih').value=TODAY; }
+  if(id==='m-satis-ekle') { fillUSelect('s-urun'); fillMSelect('s-mus'); document.getElementById('s-tarih').value=TODAY; satisUrunSec(); }
+  if(id==='m-tahsilat-ekle') { fillMSelect('t-mus'); document.getElementById('t-tarih').value=TODAY; if(selMusteri){ document.getElementById('t-mus').value=selMusteri; } }
+  if(id==='m-proje-ekle') { document.getElementById('p-tarih').value=TODAY; projeCalc(); }
+  document.getElementById(id).classList.add('open');
+}
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+function fillUSelect(elId){ document.getElementById(elId).innerHTML=DB.urunler.map(u=>`<option value="${u.id}">${u.ad}${u.men?' ['+u.men+']':''} (Stok: ${u.stok})</option>`).join(''); }
+function fillMSelect(elId){ document.getElementById(elId).innerHTML=DB.musteriler.map(m=>`<option value="${m.id}">${m.ad}</option>`).join(''); }
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, color='var(--green)') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.borderLeftColor=color;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ============================================================
+// ÜRÜN EKLE
+// ============================================================
+function urunEkle() {
+  const ad=document.getElementById('u-ad').value.trim();
+  if(!ad){ toast('⚠️ Ürün adı gerekli','var(--red)'); return; }
+  DB.urunler.push({id:DB.ids.u++,ad,kat:document.getElementById('u-kat').value||'Genel',men:document.getElementById('u-men').value||'',mal:parseFloat(document.getElementById('u-mal').value)||0,fiy:parseFloat(document.getElementById('u-fiy').value)||0,stok:parseInt(document.getElementById('u-stk').value)||0,krt:parseInt(document.getElementById('u-krt').value)||5});
+  ['u-ad','u-kat','u-men','u-mal','u-fiy','u-stk','u-krt'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-urun-ekle'); saveData(); renderStok(); toast('✅ Ürün eklendi!');
+}
+
+// ============================================================
+// STOK GİRİŞ
+// ============================================================
+function stokGiris() {
+  const uid=parseInt(document.getElementById('sg-urun').value);
+  const adet=parseInt(document.getElementById('sg-adet').value)||0;
+  const mal=parseFloat(document.getElementById('sg-mal').value);
+  const u=getU(uid);
+  if(!u||adet<=0){ toast('⚠️ Bilgileri kontrol edin','var(--red)'); return; }
+  u.stok+=adet;
+  if(!isNaN(mal)&&mal>0) u.mal=mal;
+  ['sg-adet','sg-mal','sg-not'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-stok-giris'); saveData(); renderStok(); toast('📥 Stok güncellendi!');
+}
+
+// ============================================================
+// SATIŞ
+// ============================================================
+function satisUrunSec() {
+  const u=getU(document.getElementById('s-urun').value);
+  if(u) document.getElementById('s-fiy').value=u.fiy;
+  satisCalc();
+}
+function satisCalc() {
+  const adet=parseFloat(document.getElementById('s-adet').value)||0;
+  const fiy=parseFloat(document.getElementById('s-fiy').value)||0;
+  const u=getU(document.getElementById('s-urun').value);
+  const top=adet*fiy, kar=u?adet*(fiy-u.mal):0;
+  document.getElementById('s-calc-toplam').textContent=fmt(top);
+  document.getElementById('s-calc-maliyet').textContent=fmt(u?adet*u.mal:0);
+  document.getElementById('s-calc-kar').textContent=fmt(kar);
+}
+function satisEkle() {
+  const uid=parseInt(document.getElementById('s-urun').value);
+  const mid=parseInt(document.getElementById('s-mus').value);
+  const adet=parseInt(document.getElementById('s-adet').value)||0;
+  const fiy=parseFloat(document.getElementById('s-fiy').value)||0;
+  const u=getU(uid);
+  if(!u||adet<=0||fiy<=0){ toast('⚠️ Bilgileri kontrol edin','var(--red)'); return; }
+  if(u.stok<adet){ toast('⚠️ Yetersiz stok! Mevcut: '+u.stok,'var(--red)'); return; }
+  u.stok-=adet;
+  DB.satislar.push({id:DB.ids.s++,tarih:document.getElementById('s-tarih').value||TODAY,musId:mid,urunId:uid,adet,fiy,odeme:document.getElementById('s-odeme').value});
+  ['s-adet','s-fiy'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-satis-ekle'); saveData(); renderDashboard(); renderSatis('hepsi'); toast('🛒 Satış kaydedildi!');
+}
+
+// ============================================================
+// MÜŞTERİ
+// ============================================================
+function musteriEkle() {
+  const ad=document.getElementById('m-ad').value.trim();
+  if(!ad){ toast('⚠️ Ad gerekli','var(--red)'); return; }
+  DB.musteriler.push({id:DB.ids.m++,ad,tel:document.getElementById('m-tel').value,seh:document.getElementById('m-seh').value,not:document.getElementById('m-not').value});
+  ['m-ad','m-tel','m-seh','m-not'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-musteri-ekle'); saveData(); renderMusteriler(); toast('👤 Müşteri eklendi!');
+}
+
+// ============================================================
+// TAHSİLAT
+// ============================================================
+function tahsilatEkle() {
+  const mid=parseInt(document.getElementById('t-mus').value);
+  const tutar=parseFloat(document.getElementById('t-tutar').value)||0;
+  if(tutar<=0){ toast('⚠️ Tutar girin','var(--red)'); return; }
+  DB.tahsilatlar.push({id:DB.ids.t++,tarih:document.getElementById('t-tarih').value||TODAY,musId:mid,tutar,yon:document.getElementById('t-yon').value,not:document.getElementById('t-not').value});
+  ['t-tutar','t-not'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-tahsilat-ekle'); saveData(); renderTahsilat(); renderMusteriler(); renderDashboard(); toast('💰 Tahsilat kaydedildi!');
+}
+function openTahsilatMusteri() {
+  openM('m-tahsilat-ekle');
+}
+
+// ============================================================
+// PROJE
+// ============================================================
+function projeCalc() {
+  const m2=parseFloat(document.getElementById('p-m2').value)||0;
+  const birim=parseFloat(document.getElementById('p-birim').value)||0;
+  const bedel=parseFloat(document.getElementById('p-bedel').value)||0;
+  const prim=parseFloat(document.getElementById('p-prim').value)||0;
+  const base=m2*birim;
+  const primTL=bedel*prim/100;
+  const toplam=base+primTL;
+  document.getElementById('p-calc-base').textContent=fmt(base);
+  document.getElementById('p-calc-bedel').textContent=fmt(bedel);
+  document.getElementById('p-calc-prim-label').textContent=`Prim (%${prim} × işin bedeli)`;
+  document.getElementById('p-calc-prim').textContent=fmt(primTL);
+  document.getElementById('p-calc-toplam').textContent=fmt(toplam);
+}
+function projeEkle() {
+  const ad=document.getElementById('p-ad').value.trim();
+  if(!ad){ toast('⚠️ Proje adı gerekli','var(--red)'); return; }
+  DB.projeler.push({
+    id:DB.ids.p++,ad,firma:document.getElementById('p-firma').value,
+    m2:parseFloat(document.getElementById('p-m2').value)||0,
+    birim:parseFloat(document.getElementById('p-birim').value)||0,
+    bedel:parseFloat(document.getElementById('p-bedel').value)||0,
+    prim:parseFloat(document.getElementById('p-prim').value)||0,
+    tarih:document.getElementById('p-tarih').value||TODAY,
+    durum:document.getElementById('p-durum').value,
+    primDurum:document.getElementById('p-prim-durum').value,
+    not:document.getElementById('p-not').value
+  });
+  ['p-ad','p-firma','p-m2','p-birim','p-bedel','p-prim','p-not'].forEach(id=>document.getElementById(id).value='');
+  closeM('m-proje-ekle'); saveData(); render3DProjeler(); render3DDashboard(); toast('🏗️ Proje eklendi!');
+}
+
+// ============================================================
+// RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+  document.getElementById('dash-tarih').textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  
+  const stokDeger=DB.urunler.reduce((a,u)=>a+u.stok*u.mal,0);
+  document.getElementById('d-stok').textContent=fmt(stokDeger);
+  document.getElementById('d-kalem').textContent=DB.urunler.length+' kalem';
+
+  const aySat=DB.satislar.filter(s=>isMonth(s.tarih));
+  const ayGelir=aySat.reduce((a,s)=>a+sToplam(s),0);
+  const ayKar=aySat.reduce((a,s)=>a+sKar(s),0);
+  document.getElementById('d-ay-gelir').textContent=fmt(ayGelir);
+  document.getElementById('d-ay-kar').textContent='Kâr: '+fmt(ayKar);
+
+  const acikMus=DB.musteriler.filter(m=>getMusteriAcik(m.id)>0);
+  const acikTop=acikMus.reduce((a,m)=>a+getMusteriAcik(m.id),0);
+  document.getElementById('d-cari').textContent=fmt(acikTop);
+  document.getElementById('d-cari-adet').textContent=acikMus.length+' müşteri';
+
+  const bugSat=DB.satislar.filter(s=>isToday(s.tarih));
+  document.getElementById('d-bugun').textContent=fmt(bugSat.reduce((a,s)=>a+sToplam(s),0));
+  document.getElementById('d-bugun-kar').textContent='Kâr: '+fmt(bugSat.reduce((a,s)=>a+sKar(s),0));
+
+  // Ürün chart
+  const uMap={};
+  aySat.forEach(s=>{ const u=getU(s.urunId); if(u) uMap[u.ad]=(uMap[u.ad]||0)+sToplam(s); });
+  makeBarChart(Object.entries(uMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([label,val])=>({label,val})), 'd-urun-chart');
+
+  // Kritik stok
+  const kritikler=DB.urunler.filter(u=>u.stok<=u.krt);
+  document.getElementById('d-kritik-sayi').textContent=kritikler.length+' ürün';
+  document.getElementById('d-kritik-liste').innerHTML = kritikler.length ?
+    kritikler.map(u=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:600;color:var(--text)">${u.ad}</div><div style="font-size:11px;color:var(--text3)">Kritik: ${u.krt}</div></div>
+      <span class="badge ${u.stok===0?'b-red':'b-yellow'}">${u.stok===0?'Tükendi':u.stok+' adet'}</span>
+    </div>`).join('') : '<div class="empty"><div class="empty-icon">✅</div>Stoklar yeterli</div>';
+
+  // Son işlemler
+  const son=[...DB.satislar].sort((a,b)=>b.id-a.id).slice(0,6);
+  document.getElementById('d-son-islemler').innerHTML = son.length ?
+    son.map(s=>{ const u=getU(s.urunId),m=getM(s.musId);
+      return `<tr><td>${s.tarih}</td><td class="tn">${u?.ad||'-'}${u?.men?`<div class="tsub">🌍 ${u.men}</div>`:''}</td><td>${m?.ad||'-'}</td><td>${s.adet}</td><td class="mono">${fmt(sToplam(s))}</td><td class="mono" style="color:var(--green2)">${fmt(sKar(s))}</td><td><span class="badge ${s.odeme==='odendi'?'b-green':'b-red'}">${s.odeme==='odendi'?'Ödendi':'Açık'}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty">Satış yok</td></tr>';
+}
+
+// ============================================================
+// RENDER STOK
+// ============================================================
+function renderStok(filter='') {
+  const list = filter ? DB.urunler.filter(u=>u.ad.toLowerCase().includes(filter.toLowerCase())||u.kat.toLowerCase().includes(filter.toLowerCase())) : DB.urunler;
+  document.getElementById('stok-sayi').textContent=list.length;
+  document.getElementById('stok-tbody').innerHTML = list.length ?
+    list.map(u=>{
+      const marj=u.fiy>0?Math.round((u.fiy-u.mal)/u.fiy*100):0;
+      const si=u.stok===0?'si-crit':u.stok<=u.krt?'si-warn':'si-ok';
+      const st=u.stok===0?'Tükendi':u.stok<=u.krt?'Kritik':'Yeterli';
+      return `<tr>
+        <td><div class="tn">${u.ad}</div>${u.men?`<div class="tsub">🌍 ${u.men}</div>`:''}</td>
+        <td><span class="badge b-blue">${u.kat}</span></td>
+        <td>${u.men ? `<span class="badge b-cyan">🌍 ${u.men}</span>` : '<span style="color:var(--text3)">—</span>'}</td>
+        <td class="mono"><b>${u.stok}</b></td>
+        <td class="mono">${fmt(u.mal)}</td>
+        <td class="mono">${fmt(u.fiy)}</td>
+        <td class="mono" style="color:var(--green2)">%${marj}</td>
+        <td><span class="si ${si}"></span>${st}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="editUrun(${u.id})">✏️</button> <button class="btn btn-red btn-sm" onclick="delUrun(${u.id})">🗑</button></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="8" class="empty">Ürün bulunamadı</td></tr>';
+}
+function filterStok(v){ renderStok(v); }
+function editUrun(id) {
+  const u=getU(id); if(!u) return;
+  const fiy=prompt(`"${u.ad}" satış fiyatını girin (şu an: ${u.fiy}₺):`);
+  if(fiy!==null&&!isNaN(fiy)&&parseFloat(fiy)>0) u.fiy=parseFloat(fiy);
+  const mal=prompt(`Maliyeti girin (şu an: ${u.mal}₺):`);
+  if(mal!==null&&!isNaN(mal)&&parseFloat(mal)>0) u.mal=parseFloat(mal);
+  saveData(); renderStok(); toast('✅ Ürün güncellendi!');
+}
+function delUrun(id) {
+  if(!confirm('Ürünü silmek istiyor musunuz?')) return;
+  DB.urunler=DB.urunler.filter(u=>u.id!=id);
+  saveData(); renderStok(); toast('🗑 Ürün silindi','var(--red)');
+}
+
+// ============================================================
+// RENDER SATIŞ
+// ============================================================
+function renderSatis(f) {
+  let list=DB.satislar;
+  if(f==='bugun') list=list.filter(s=>isToday(s.tarih));
+  else if(f==='hafta') list=list.filter(s=>isWeek(s.tarih));
+  else if(f==='ay') list=list.filter(s=>isMonth(s.tarih));
+  list=[...list].sort((a,b)=>b.id-a.id);
+  const gelir=list.reduce((a,s)=>a+sToplam(s),0);
+  const kar=list.reduce((a,s)=>a+sKar(s),0);
+  document.getElementById('s-toplam-gelir').textContent=fmt(gelir);
+  document.getElementById('s-toplam-kar').textContent=fmt(kar);
+  document.getElementById('s-marj').textContent=gelir>0?'%'+Math.round(kar/gelir*100):'%0';
+  document.getElementById('satis-tbody').innerHTML = list.length ?
+    list.map(s=>{ const u=getU(s.urunId),m=getM(s.musId);
+      return `<tr><td>${s.tarih}</td><td>${m?.ad||'-'}</td><td class="tn">${u?.ad||'-'}${u?.men?`<div class="tsub">🌍 ${u.men}</div>`:''}</td><td>${s.adet}</td><td class="mono">${fmt(s.fiy)}</td><td class="mono">${fmt(sToplam(s))}</td><td class="mono">${fmt(s.adet*(u?.mal||0))}</td><td class="mono" style="color:var(--green2)">${fmt(sKar(s))}</td><td><span class="badge ${s.odeme==='odendi'?'b-green':'b-red'}">${s.odeme==='odendi'?'Ödendi':'Açık'}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="9" class="empty">Satış bulunamadı</td></tr>';
+}
+
+// ============================================================
+// RENDER RAPORLAR
+// ============================================================
+function renderRaporlar(f) {
+  let list=DB.satislar;
+  if(f==='gunluk') list=list.filter(s=>isToday(s.tarih));
+  else if(f==='haftalik') list=list.filter(s=>isWeek(s.tarih));
+  else if(f==='aylik') list=list.filter(s=>isMonth(s.tarih));
+  const gelir=list.reduce((a,s)=>a+sToplam(s),0);
+  const kar=list.reduce((a,s)=>a+sKar(s),0);
+  document.getElementById('r-satis').textContent=fmt(gelir);
+  document.getElementById('r-kar').textContent=fmt(kar);
+  document.getElementById('r-marj').textContent=gelir>0?'%'+Math.round(kar/gelir*100):'%0';
+  document.getElementById('r-adet').textContent=list.reduce((a,s)=>a+s.adet,0);
+  const uMap={},kMap={},mMap={};
+  list.forEach(s=>{ const u=getU(s.urunId),m=getM(s.musId);
+    if(u){ uMap[u.ad]=(uMap[u.ad]||0)+sToplam(s); kMap[u.ad]=(kMap[u.ad]||0)+sKar(s); }
+    if(m) mMap[m.ad]=(mMap[m.ad]||0)+sToplam(s);
+  });
+  makeBarChart(Object.entries(uMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,v])=>({label:l,val:v})),'r-urun-chart');
+  makeBarChart(Object.entries(kMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([l,v])=>({label:l,val:v})),'r-kar-chart');
+  makeBarChart(Object.entries(mMap).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([l,v])=>({label:l,val:v})),'r-musteri-chart');
+}
+function showRapor(f,el){ document.querySelectorAll('#page-raporlar .tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); renderRaporlar(f); }
+
+// ============================================================
+// RENDER MÜŞTERİLER
+// ============================================================
+function renderMusteriler() {
+  document.getElementById('musteri-listesi').innerHTML = DB.musteriler.map(m=>{
+    const bak=getMusteriAcik(m.id);
+    return `<div class="cc ${selMusteri==m.id?'sel':''}" id="mc-${m.id}" onclick="selectMusteri(${m.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="cc-name">${m.ad}</div><div style="font-size:11px;color:var(--text3)">${m.tel||''}${m.seh?' · '+m.seh:''}</div></div>
+        <div style="text-align:right"><div class="sl">Bakiye</div><div class="cc-bal ${bak>0?'bal-red':'bal-green'}">${fmt(Math.abs(bak))}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectMusteri(mid) {
+  selMusteri = mid;
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('mc-'+mid)?.classList.add('sel');
+  const m=getM(mid);
+  const mSat=DB.satislar.filter(s=>s.musId==mid);
+  const mTah=DB.tahsilatlar.filter(t=>t.musId==mid);
+  const tSat=mSat.reduce((a,s)=>a+sToplam(s),0);
+  const tTah=mTah.reduce((a,t)=>a+t.tutar,0);
+  const bak=tSat-tTah;
+  document.getElementById('md-ad').textContent=m.ad;
+  document.getElementById('md-tel').textContent=(m.tel||'')+(m.seh?' · '+m.seh:'');
+  document.getElementById('md-bakiye').textContent=fmt(Math.abs(bak));
+  document.getElementById('md-bakiye').className='cc-bal '+(bak>0?'bal-red':'bal-green');
+  document.getElementById('md-tsatis').textContent=fmt(tSat);
+  document.getElementById('md-ttahsilat').textContent=fmt(tTah);
+  document.getElementById('md-tbakiye2').textContent=fmt(bak);
+  document.getElementById('md-tbakiye2').style.color=bak>0?'var(--red)':'var(--green2)';
+
+  // İşlem geçmişi
+  let islemler=[];
+  let bakiyeCalc=0;
+  [...mSat.map(s=>{
+    const u=getU(s.urunId);
+    const uAd=(u?.ad||'-')+(u?.men?' ['+u.men+']':'');
+    const acik=`${uAd} × ${s.adet} adet @ ${fmt(s.fiy)}`;
+    return {tarih:s.tarih,id:'s'+s.id,tip:'Satış',acik,tutar:sToplam(s),sign:1};
+  }),
+   ...mTah.map(t=>({tarih:t.tarih,id:'t'+t.id,tip:'Tahsilat',acik:t.yon+(t.not?' — '+t.not:''),tutar:t.tutar,sign:-1}))
+  ].sort((a,b)=>a.tarih.localeCompare(b.tarih)).forEach(i=>{ bakiyeCalc+=i.sign*i.tutar; islemler.push({...i,bak:bakiyeCalc}); });
+  islemler.reverse();
+
+  document.getElementById('md-islemler').innerHTML = islemler.length ?
+    islemler.map(i=>`<tr>
+      <td>${i.tarih}</td>
+      <td><span class="badge ${i.tip==='Satış'?'b-red':'b-green'}">${i.tip}</span></td>
+      <td>${i.acik}</td>
+      <td class="mono" style="color:${i.tip==='Satış'?'#f87171':'var(--green2)'}"><b>${i.tip==='Satış'?'+':'-'}${fmt(i.tutar)}</b></td>
+      <td class="mono" style="color:${i.bak>0?'#f87171':'var(--green2)'}">${fmt(i.bak)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="empty">İşlem yok</td></tr>';
+
+  document.getElementById('musteri-detay').style.display='block';
+  document.getElementById('musteri-detay-bos').style.display='none';
+}
+
+// ============================================================
+// RENDER TAHSİLAT
+// ============================================================
+function renderTahsilat() {
+  const acik=DB.musteriler.reduce((a,m)=>a+Math.max(0,getMusteriAcik(m.id)),0);
+  const ayTah=DB.tahsilatlar.filter(t=>isMonth(t.tarih)).reduce((a,t)=>a+t.tutar,0);
+  const bek=DB.musteriler.filter(m=>getMusteriAcik(m.id)>0).length;
+  document.getElementById('t-alacak').textContent=fmt(acik);
+  document.getElementById('t-ay-tah').textContent=fmt(ayTah);
+  document.getElementById('t-bekleyen').textContent=bek;
+  const list=[...DB.tahsilatlar].sort((a,b)=>b.id-a.id);
+  document.getElementById('tahsilat-tbody').innerHTML = list.length ?
+    list.map(t=>`<tr><td>${t.tarih}</td><td class="tn">${getM(t.musId)?.ad||'-'}</td><td class="mono" style="color:var(--green2)"><b>${fmt(t.tutar)}</b></td><td>${t.yon||'-'}</td><td>${t.not||'-'}</td></tr>`).join('') :
+    '<tr><td colspan="5" class="empty">Tahsilat yok</td></tr>';
+}
+
+// ============================================================
+// RENDER 3D DASHBOARD
+// ============================================================
+function render3DDashboard() {
+  const topKazanc=DB.projeler.reduce((a,p)=>a+pToplam(p),0);
+  const ayKazanc=DB.projeler.filter(p=>isMonth(p.tarih)).reduce((a,p)=>a+pToplam(p),0);
+  const tamamlanan=DB.projeler.filter(p=>p.durum==='tamamlandi').length;
+  const bekPrim=DB.projeler.filter(p=>p.primDurum==='bekliyor').reduce((a,p)=>a+pPrim(p),0);
+  document.getElementById('td-kazanc').textContent=fmt(topKazanc);
+  document.getElementById('td-ay').textContent=fmt(ayKazanc);
+  document.getElementById('td-tamamlanan').textContent=tamamlanan;
+  document.getElementById('td-prim').textContent=fmt(bekPrim);
+
+  const son=[...DB.projeler].sort((a,b)=>b.id-a.id).slice(0,3);
+  document.getElementById('td-son-projeler').innerHTML = son.length ?
+    son.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:600;color:var(--text)">${p.ad}</div><div style="font-size:11px;color:var(--text3)">${p.firma} · ${p.m2}m²</div></div>
+      <div style="text-align:right"><div class="mono" style="font-weight:700">${fmt(pToplam(p))}</div>
+      <span class="proj-status ${p.durum==='tamamlandi'?'ps-tamamlandi':p.durum==='devam'?'ps-devam':'ps-bekliyor'}">${p.durum==='tamamlandi'?'✅ Tamamlandı':p.durum==='devam'?'🔄 Devam':'⏳ Bekliyor'}</span></div>
+    </div>`).join('') : '<div class="empty">Proje yok</div>';
+
+  const kazMap={};
+  DB.projeler.forEach(p=>{ kazMap[p.firma]=(kazMap[p.firma]||0)+pToplam(p); });
+  makeBarChart(Object.entries(kazMap).sort((a,b)=>b[1]-a[1]).map(([l,v])=>({label:l,val:v})),'td-kazanc-chart');
+}
+
+// ============================================================
+// RENDER 3D PROJELER
+// ============================================================
+function render3DProjeler() {
+  const el=document.getElementById('proje-listesi');
+  el.innerHTML = DB.projeler.length ?
+    [...DB.projeler].sort((a,b)=>b.id-a.id).map(p=>`
+    <div class="proj-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#fff">${p.ad}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${p.firma} · ${p.tarih}</div>
+        </div>
+        <span class="proj-status ${p.durum==='tamamlandi'?'ps-tamamlandi':p.durum==='devam'?'ps-devam':'ps-bekliyor'}">${p.durum==='tamamlandi'?'✅ Tamamlandı':p.durum==='devam'?'🔄 Devam':'⏳ Bekliyor'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;background:var(--s3);border-radius:var(--r2);padding:12px">
+        <div><div class="sl">Alan</div><div class="mono" style="font-size:15px;font-weight:700">${p.m2} m²</div></div>
+        <div><div class="sl">m² Fiyat</div><div class="mono" style="font-size:15px;font-weight:700">${fmt(p.birim)}</div></div>
+        <div><div class="sl">İşin Bedeli</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--blue2)">${fmt(p.bedel||0)}</div></div>
+        <div><div class="sl">Prim %${p.prim}</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--purple)">${fmt(pPrim(p))}</div></div>
+        <div><div class="sl">Kazancım</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--green2)">${fmt(pToplam(p))}</div></div>
+      </div>
+      ${p.not?`<div style="margin-top:8px;font-size:12px;color:var(--text3)">📝 ${p.not}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span class="badge ${p.primDurum==='odendi'?'b-green':'b-yellow'}">Prim: ${p.primDurum==='odendi'?'✅ Ödendi':'⏳ Bekliyor'}</span>
+        <div style="display:flex;gap:6px">
+          ${p.primDurum==='bekliyor'?`<button class="btn btn-ghost btn-sm" onclick="primOde(${p.id})">💰 Prim Ödendi</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="durumDegistir(${p.id})">🔄 Durum</button>
+          <button class="btn btn-blue btn-sm" onclick="openProjeDuzenle(${p.id})">✏️ Düzenle</button>
+          <button class="btn btn-red btn-sm" onclick="delProje(${p.id})">🗑</button>
+        </div>
+      </div>
+    </div>`).join('') : '<div class="empty"><div class="empty-icon">🏗️</div>Henüz proje yok</div>';
+}
+
+function openProjeDuzenle(id) {
+  const p = DB.projeler.find(x=>x.id==id); if(!p) return;
+  document.getElementById('pd-id').value = p.id;
+  document.getElementById('pd-ad').value = p.ad;
+  document.getElementById('pd-firma').value = p.firma;
+  document.getElementById('pd-m2').value = p.m2;
+  document.getElementById('pd-birim').value = p.birim;
+  document.getElementById('pd-bedel').value = p.bedel||0;
+  document.getElementById('pd-prim').value = p.prim;
+  document.getElementById('pd-tarih').value = p.tarih;
+  document.getElementById('pd-durum').value = p.durum;
+  document.getElementById('pd-prim-durum').value = p.primDurum;
+  document.getElementById('pd-not').value = p.not||'';
+  projeDuzenleCalc();
+  openM('m-proje-duzenle');
+}
+
+function projeDuzenleCalc() {
+  const m2 = parseFloat(document.getElementById('pd-m2').value)||0;
+  const birim = parseFloat(document.getElementById('pd-birim').value)||0;
+  const bedel = parseFloat(document.getElementById('pd-bedel').value)||0;
+  const prim = parseFloat(document.getElementById('pd-prim').value)||0;
+  const base = m2*birim;
+  const primTutar = bedel*(prim/100);
+  document.getElementById('pd-calc-base').textContent = fmt(base);
+  document.getElementById('pd-calc-bedel').textContent = fmt(bedel);
+  document.getElementById('pd-calc-prim-label').textContent = `Prim (%${prim})`;
+  document.getElementById('pd-calc-prim').textContent = fmt(primTutar);
+  document.getElementById('pd-calc-toplam').textContent = fmt(base+primTutar);
+}
+
+function projeKaydet() {
+  const id = parseInt(document.getElementById('pd-id').value);
+  const p = DB.projeler.find(x=>x.id==id); if(!p) return;
+  p.ad = document.getElementById('pd-ad').value.trim();
+  p.firma = document.getElementById('pd-firma').value.trim();
+  p.m2 = parseFloat(document.getElementById('pd-m2').value)||0;
+  p.birim = parseFloat(document.getElementById('pd-birim').value)||0;
+  p.bedel = parseFloat(document.getElementById('pd-bedel').value)||0;
+  p.prim = parseFloat(document.getElementById('pd-prim').value)||0;
+  p.tarih = document.getElementById('pd-tarih').value;
+  p.durum = document.getElementById('pd-durum').value;
+  p.primDurum = document.getElementById('pd-prim-durum').value;
+  p.not = document.getElementById('pd-not').value.trim();
+  closeM('m-proje-duzenle');
+  saveData(); render3DProjeler(); render3DDashboard(); toast('✏️ Proje güncellendi!');
+}
+
+
+function primOde(id) {
+  const p=DB.projeler.find(x=>x.id==id); if(!p) return;
+  p.primDurum='odendi'; saveData(); render3DProjeler(); render3DDashboard(); toast('💰 Prim ödendi işaretlendi!');
+}
+function durumDegistir(id) {
+  const p=DB.projeler.find(x=>x.id==id); if(!p) return;
+  const durumlar=['bekliyor','devam','tamamlandi'];
+  const idx=durumlar.indexOf(p.durum);
+  p.durum=durumlar[(idx+1)%3];
+  saveData(); render3DProjeler(); render3DDashboard(); toast('🔄 Durum güncellendi!');
+}
+function delProje(id) {
+  if(!confirm('Projeyi silmek istiyor musunuz?')) return;
+  DB.projeler=DB.projeler.filter(p=>p.id!=id);
+  saveData(); render3DProjeler(); render3DDashboard(); toast('🗑 Proje silindi','var(--red)');
+}
+
+// ============================================================
+// RENDER 3D RAPORLAR
+// ============================================================
+function render3DRaporlar() {
+  const topM2=DB.projeler.reduce((a,p)=>a+p.m2,0);
+  const ortBirim=DB.projeler.length?DB.projeler.reduce((a,p)=>a+p.birim,0)/DB.projeler.length:0;
+  const topPrim=DB.projeler.reduce((a,p)=>a+pPrim(p),0);
+  document.getElementById('tr-m2').textContent=topM2+' m²';
+  document.getElementById('tr-ort').textContent=fmt(ortBirim);
+  document.getElementById('tr-prim').textContent=fmt(topPrim);
+  makeBarChart(DB.projeler.map(p=>({label:p.ad,val:pToplam(p)})).sort((a,b)=>b.val-a.val),'tr-chart');
+}
+
+// ============================================================
+// GOOGLE SHEETS ENTEGRASYONU
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBzzAfi1h0H0EZNaK2iEeZdx3-osJVTExWsbPqPkt59bSRTmeqYCbH_isamg7CJ3YkAw/exec';
+
+let isSaving = false;
+let saveTimeout = null;
+
+async function saveData() {
+  // Her zaman localStorage'a kaydet (hızlı yedek)
+  try { localStorage.setItem('istakip_v2', JSON.stringify(DB)); } catch(e){}
+  
+  // Google Sheets'e kaydet (debounce ile — art arda kaydetmeyi önler)
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async () => {
+    if(isSaving) return;
+    isSaving = true;
+    
+    const btn = document.querySelector('.save-btn');
+    if(btn) { btn.innerHTML = '⏳ <span>Kaydediliyor...</span>'; btn.disabled = true; }
+    
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveAll', data: DB })
+      });
+      const result = await res.json();
+      if(result.success) {
+        toast('☁️ Google Sheets\'e kaydedildi!');
+        if(btn) btn.innerHTML = '✅ <span>Kaydedildi</span>';
+        setTimeout(() => { if(btn) { btn.innerHTML = '💾 <span>Kaydet</span>'; btn.disabled = false; } }, 2000);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch(err) {
+      toast('⚠️ Sheets bağlantı hatası — yerel kaydedildi', 'var(--yellow)');
+      if(btn) { btn.innerHTML = '💾 <span>Kaydet</span>'; btn.disabled = false; }
+    }
+    isSaving = false;
+  }, 800);
+}
+
+async function loadFromSheets() {
+  const statusEl = document.getElementById('sync-status');
+  if(statusEl) statusEl.textContent = '⏳ Veriler yükleniyor...';
+  
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll');
+    const result = await res.json();
+    
+    if(result.urunler !== undefined) {
+      // Sheets'ten gelen veriyi parse et
+      DB.urunler     = parseRows(result.urunler,     ['id','ad','kat','men','mal','fiy','stok','krt'], ['id','mal','fiy','stok','krt']);
+      DB.musteriler  = parseRows(result.musteriler,  ['id','ad','tel','seh','not'], ['id']);
+      DB.satislar    = parseRows(result.satislar,    ['id','tarih','musId','urunId','adet','fiy','odeme'], ['id','musId','urunId','adet','fiy']);
+      DB.tahsilatlar = parseRows(result.tahsilatlar, ['id','tarih','musId','tutar','yon','not'], ['id','musId','tutar']);
+      DB.projeler    = parseRows(result.projeler,    ['id','ad','firma','m2','birim','bedel','prim','tarih','durum','primDurum','not'], ['id','m2','birim','bedel','prim']);
+      
+      // ID'leri güncelle
+      ['urunler','musteriler','satislar','tahsilatlar','projeler'].forEach(k => {
+        const ids = DB[k].map(x=>parseInt(x.id)||0);
+        const key = {urunler:'u',musteriler:'m',satislar:'s',tahsilatlar:'t',projeler:'p'}[k];
+        if(key) DB.ids[key] = (Math.max(0,...ids) + 1);
+      });
+      
+      // localStorage'ı güncelle
+      try { localStorage.setItem('istakip_v2', JSON.stringify(DB)); } catch(e){}
+      
+      if(statusEl) statusEl.textContent = '☁️ Sheets\'ten yüklendi';
+      toast('☁️ Veriler Google Sheets\'ten yüklendi!');
+    } else {
+      if(statusEl) statusEl.textContent = '💾 Yerel veri kullanılıyor';
+      toast('⚠️ Sheets boş — yerel veri kullanılıyor', 'var(--yellow)');
+    }
+  } catch(err) {
+    if(statusEl) statusEl.textContent = '⚠️ Bağlantı yok — yerel veri';
+    toast('⚠️ Sheets\'e bağlanılamadı — yerel veri kullanılıyor', 'var(--yellow)');
+  }
+  
+  renderDashboard();
+}
+
+function parseRows(rows, fields, numericFields) {
+  if(!rows || !rows.length) return [];
+  return rows.filter(r => r.id !== '' && r.id !== undefined).map(r => {
+    const obj = {};
+    fields.forEach(f => {
+      obj[f] = numericFields.includes(f) ? (parseFloat(r[f]) || 0) : (r[f] || '');
+    });
+    return obj;
+  });
+}
+function exportData() {
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='istakip-yedek-'+TODAY+'.json'; a.click();
+  toast('⬇ Yedek indirildi!');
+}
+function importData() { document.getElementById('import-file').click(); }
+function importFile(input) {
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ try { DB=JSON.parse(e.target.result); saveData(); renderDashboard(); toast('⬆ Veri yüklendi!'); } catch(err){ toast('⚠️ Geçersiz dosya','var(--red)'); } };
+  reader.readAsText(file); input.value='';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('dash-tarih').textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Önce localStorage'dan yükle (hızlı başlangıç)
+try { const saved = localStorage.getItem('istakip_v2'); if(saved) DB = JSON.parse(saved); } catch(e){}
+renderDashboard();
+
+// Sonra Sheets'ten güncelle
+loadFromSheets();
+</script>
+</body>
+</html>
